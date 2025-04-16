@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MamaMag Placement Reservation</title>
+</head>
+<body>
+  <header>
+    <img src="mamamag-logo.svg" alt="MamaMag Logo" style="max-width:200px;" />
+    <h1>MamaMag Placement Reservation</h1>
+  </header>
+  <form id="reservation-form">
+    <!-- Form fields go here -->
+    <input type="text" id="brand-name" name="brandName" placeholder="Brand Name" required />
+    <input type="file" id="brand-logo" name="brandLogo" accept=".svg,.png" required />
+    <input type="file" id="product-images" name="productImages" accept="image/*" multiple required />
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("reservation-form");
+    const brandLogo = document.getElementById("brand-logo");
+    const productImages = document.getElementById("product-images");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const brandName = document.getElementById("brand-name").value;
+
+      const formData = new FormData();
+      formData.append("formData", JSON.stringify({ brandName }));
+
+      if (brandLogo.files.length > 0) {
+        formData.append("brandLogo", brandLogo.files[0]);
+      }
+
+      for (let i = 0; i < productImages.files.length; i++) {
+        formData.append("productImages[]", productImages.files[i]);
+      }
+
+      fetch("https://script.google.com/a/macros/postpilot.com/s/AKfycbySo-igSpJwL1dct5V0Rqu4rJ7oJW9n8mDGL8Xnr1qHRzBciXAmQE8joU2ptBkmjt0F/exec", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.success ? "Submitted successfully!" : "Submission failed.");
+      })
+      .catch(err => {
+        console.error("Submission error:", err);
+        alert("Error submitting the form.");
+      });
+    });
+  </script>
+</body>
+</html>

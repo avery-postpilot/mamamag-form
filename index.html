@@ -1246,65 +1246,35 @@
                 submissionDate: new Date().toISOString()
             };
             
-            // Prepare files for upload
-            const files = new FormData();
-            
-            // Add logo file
-            if (brandLogo.files.length > 0) {
-                files.append('brandLogo', brandLogo.files[0]);
-            }
-            
-            // Add product images
-            if (productImages.files.length > 0) {
-                for (let i = 0; i < productImages.files.length; i++) {
-                    files.append('productImages[]', productImages.files[i]);
-                }
-            }
-            
-            // Add form data as JSON
-            files.append('formData', JSON.stringify(formData));
-            
-            // Submit the form to Google Apps Script
-            // In a production environment, this would be your actual endpoint
+            // Submit to Google Apps Script
+            // Replace with your actual script URL from the Google Apps Script deployment
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbySo-igSpJwL1dct5V0Rqu4rJ7oJW9n8mDGL8Xnr1qHRzBciXAmQE8joU2ptBkmjt0F/exec';
             
-            // For this demo, we'll simulate a successful submission
-            setTimeout(() => {
-                // In production, this would be a fetch request:
-                
-                fetch(scriptUrl, {
-                    method: 'POST',
-                    body: files,
-                    mode: 'no-cors'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        // Show success message
-                        loader.style.display = 'none';
-                        successMessage.style.display = 'block';
-                        resetForm();
-                    } else {
-                        // Show error message
-                        loader.style.display = 'none';
-                        errorMessage.textContent = 'There was an error submitting your reservation. Please try again.';
-                        errorMessage.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    // Show error message
-                    loader.style.display = 'none';
-                    errorMessage.textContent = 'There was an error connecting to the server. Please try again later.';
-                    errorMessage.style.display = 'block';
-                    console.error('Error:', error);
-                });
-                
-                
-                // Simulate success
+            console.log("Submitting data:", formData);
+            
+            // For testing, we'll do a direct fetch without files first
+            fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+                mode: 'no-cors' // Required for Apps Script Web Apps
+            })
+            .then(response => {
+                console.log("Received response");
+                // Since no-cors mode doesn't let us read the response,
+                // we'll assume success unless there's a network error
                 loader.style.display = 'none';
                 successMessage.style.display = 'block';
                 resetForm();
-                
-            }, 2000); // Simulate network delay
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loader.style.display = 'none';
+                errorMessage.textContent = 'There was an error connecting to the server. Please try again later.';
+                errorMessage.style.display = 'block';
+            });
         }
         
         // Reset the form and selection

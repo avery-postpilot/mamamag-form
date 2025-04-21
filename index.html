@@ -615,17 +615,20 @@
     
     <script>
         // Campaign and Magazine Layout Data
+       // Campaign and Magazine Layout Data
         const campaignData = {
             campaignId: "MM-SP25",
             campaignName: "Spring 2025 - Maternity in Style",
-            volume: 50000,
-            inHomeDate: "2025-05-15"
+            volume: 50000,  // Default value
+            inHomeDate: "2025-05-15"  // Default value in YYYY-MM-DD format
         };
         
         // Magazine Layout Data
         const magazineData = {
             campaignId: campaignData.campaignId,
             campaignName: campaignData.campaignName,
+            volume: campaignData.volume,  // Make sure to copy from campaignData
+            inHomeDate: campaignData.inHomeDate,  // Make sure to copy from campaignData
             pages: [
                 {
                     id: "cover",
@@ -1246,33 +1249,33 @@
                 submissionDate: new Date().toISOString()
             };
             
-            // Submit to Google Apps Script
-            // Replace with your actual script URL from the Google Apps Script deployment
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbySo-igSpJwL1dct5V0Rqu4rJ7oJW9n8mDGL8Xnr1qHRzBciXAmQE8joU2ptBkmjt0F/exec';
-            
             console.log("Submitting data:", formData);
             
-            // For testing, we'll do a direct fetch without files first
+            // Method 1: Using URLSearchParams (more compatible with Google Apps Script)
+            const formDataParam = new URLSearchParams();
+            formDataParam.append('formData', JSON.stringify(formData));
+            
+            // Replace with your actual Google Apps Script URL
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbySo-igSpJwL1dct5V0Rqu4rJ7oJW9n8mDGL8Xnr1qHRzBciXAmQE8joU2ptBkmjt0F/exec';
+            
+            // Submit to Google Apps Script
             fetch(scriptUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-                mode: 'no-cors' // Required for Apps Script Web Apps
+                body: formDataParam,
+                mode: 'no-cors' // Required for Google Apps Script
             })
-            .then(response => {
-                console.log("Received response");
-                // Since no-cors mode doesn't let us read the response,
+            .then(() => {
+                // Since no-cors mode doesn't allow reading the response,
                 // we'll assume success unless there's a network error
+                console.log("Form submitted successfully");
                 loader.style.display = 'none';
                 successMessage.style.display = 'block';
                 resetForm();
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error submitting form:', error);
                 loader.style.display = 'none';
-                errorMessage.textContent = 'There was an error connecting to the server. Please try again later.';
+                errorMessage.textContent = 'There was an error submitting your reservation. Please try again.';
                 errorMessage.style.display = 'block';
             });
         }

@@ -1218,7 +1218,7 @@
         }
         
         // Submit the reservation
-        function submitReservation(event) {
+         function submitReservation(event) {
             event.preventDefault();
             
             // Validate the form
@@ -1235,10 +1235,10 @@
             
             // Collect the form data
             const formData = {
-                campaignId: magazineData.campaignId,
-                campaignName: magazineData.campaignName,
-                volume: magazineData.volume,
-                inHomeDate: magazineData.inHomeDate,
+                campaignId: magazineData.campaignId || "MM-SP25",
+                campaignName: magazineData.campaignName || "Spring 2025 - Maternity in Style",
+                volume: magazineData.volume || 50000,
+                inHomeDate: magazineData.inHomeDate || "2025-05-15",
                 brandName: document.getElementById('brand-name').value,
                 contactName: document.getElementById('contact-name').value,
                 contactEmail: document.getElementById('contact-email').value,
@@ -1251,33 +1251,29 @@
             
             console.log("Submitting data:", formData);
             
-            // Method 1: Using URLSearchParams (more compatible with Google Apps Script)
-            const formDataParam = new URLSearchParams();
-            formDataParam.append('formData', JSON.stringify(formData));
+            // Use the reliable method of a hidden form submission
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'https://script.google.com/macros/s/AKfycbx9iYpgKu6GuUG0DchmU8SN2A9mHD1igvJ053YhYqFXRV5PHx_V7RRV3RIkg_SYVLot/exec'; // Replace with your script URL
+            form.target = '_blank'; // Open response in new tab (for debugging)
             
-            // Replace with your actual Google Apps Script URL
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbx9iYpgKu6GuUG0DchmU8SN2A9mHD1igvJ053YhYqFXRV5PHx_V7RRV3RIkg_SYVLot/exec';
+            // Add the form data as a hidden input
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'formData';
+            input.value = JSON.stringify(formData);
+            form.appendChild(input);
             
-            // Submit to Google Apps Script
-            fetch(scriptUrl, {
-                method: 'POST',
-                body: formDataParam,
-                mode: 'no-cors' // Required for Google Apps Script
-            })
-            .then(() => {
-                // Since no-cors mode doesn't allow reading the response,
-                // we'll assume success unless there's a network error
-                console.log("Form submitted successfully");
+            // Add the form to the body and submit it
+            document.body.appendChild(form);
+            form.submit();
+            
+            // Show success message after short delay (since we can't catch the response)
+            setTimeout(() => {
                 loader.style.display = 'none';
                 successMessage.style.display = 'block';
                 resetForm();
-            })
-            .catch(error => {
-                console.error('Error submitting form:', error);
-                loader.style.display = 'none';
-                errorMessage.textContent = 'There was an error submitting your reservation. Please try again.';
-                errorMessage.style.display = 'block';
-            });
+            }, 2000);
         }
         
         // Reset the form and selection

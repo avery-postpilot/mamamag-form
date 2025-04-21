@@ -275,6 +275,14 @@
             margin-top: 40px;
         }
         
+        .pricing-notice {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
         .summary-table {
             width: 100%;
             border-collapse: collapse;
@@ -423,9 +431,13 @@
 <body>
     <div class="container">
         <header>
-            <img src="mamamag-logo.png" alt="MamaMag Logo">
+            <img src="mamamag-logo.svg" alt="MamaMag Logo">
             <h1>MamaMag Placement Reservation</h1>
             <p>Spring 2025 Edition - Maternity in Style</p>
+            <div class="campaign-details">
+                <p><strong>Distribution:</strong> <span id="volume-display">50,000</span> copies</p>
+                <p><strong>In-Home Date:</strong> <span id="in-home-display">May 15, 2025</span></p>
+            </div>
         </header>
         
         <form id="reservation-form">
@@ -553,6 +565,11 @@
             <!-- Summary Section -->
             <div class="card summary-section">
                 <h2>Your Selected Placements</h2>
+                
+                <div class="pricing-notice">
+                    <p><strong>Please Note:</strong> The prices shown are suggested prices based on our standard rate card. Any previously negotiated volume discounts or special rates will be honored when you are invoiced. If you have questions about pricing or want to discuss rates, please contact your account manager.</p>
+                </div>
+                
                 <div id="empty-selection-message">
                     <p>No placements selected yet. Click on a page in the magazine layout above to add a placement.</p>
                 </div>
@@ -597,10 +614,18 @@
     </div>
     
     <script>
-        // Magazine Layout Data - This would be fetched from Google Sheets in production
-        const magazineData = {
+        // Campaign and Magazine Layout Data
+        const campaignData = {
             campaignId: "MM-SP25",
             campaignName: "Spring 2025 - Maternity in Style",
+            volume: 50000,
+            inHomeDate: "2025-05-15"
+        };
+        
+        // Magazine Layout Data
+        const magazineData = {
+            campaignId: campaignData.campaignId,
+            campaignName: campaignData.campaignName,
             pages: [
                 {
                     id: "cover",
@@ -621,11 +646,11 @@
                     available: true
                 },
                 {
-                    id: "page-2",
+                    id: "toc",
                     pageNumber: "2",
-                    name: "Standard Full Page",
-                    type: "Standard",
-                    basePrice: 7500,
+                    name: "Table of Contents Product Slot",
+                    type: "Premium",
+                    basePrice: 500,
                     additionalPremium: 0,
                     available: true
                 },
@@ -639,13 +664,24 @@
                     available: true
                 },
                 {
-                    id: "spread-4-5",
-                    pageNumber: "4-5",
-                    name: "Two-Page Spread",
-                    type: "Premium",
+                    id: "page-4",
+                    pageNumber: "4",
+                    name: "Standard Full Page",
+                    type: "Standard",
                     basePrice: 7500,
-                    additionalPremium: 5000,
-                    available: true
+                    additionalPremium: 0,
+                    available: true,
+                    facingPage: "page-5"
+                },
+                {
+                    id: "page-5",
+                    pageNumber: "5",
+                    name: "Standard Full Page",
+                    type: "Standard",
+                    basePrice: 7500,
+                    additionalPremium: 0,
+                    available: true,
+                    facingPage: "page-4"
                 },
                 {
                     id: "page-6",
@@ -654,8 +690,7 @@
                     type: "Standard",
                     basePrice: 7500,
                     additionalPremium: 0,
-                    available: false,
-                    reservedBy: "Caden Lane"
+                    available: true
                 },
                 {
                     id: "page-7",
@@ -682,7 +717,8 @@
                     type: "Standard",
                     basePrice: 7500,
                     additionalPremium: 0,
-                    available: true
+                    available: true,
+                    facingPage: "page-11"
                 },
                 {
                     id: "page-11",
@@ -691,7 +727,8 @@
                     type: "Standard",
                     basePrice: 7500,
                     additionalPremium: 0,
-                    available: true
+                    available: true,
+                    facingPage: "page-10"
                 },
                 {
                     id: "page-12",
@@ -700,8 +737,7 @@
                     type: "Standard",
                     basePrice: 7500,
                     additionalPremium: 0,
-                    available: false,
-                    reservedBy: "Kindred Bravely"
+                    available: true
                 },
                 {
                     id: "page-13",
@@ -726,6 +762,9 @@
         
         // Store the selected placements
         const selectedPlacements = {};
+        
+        // Additional state to track facing pages
+        const spreadSelections = {};
         
         // DOM Elements
         const magazineLayout = document.getElementById('magazine-layout');
@@ -757,7 +796,63 @@
         document.addEventListener('DOMContentLoaded', function() {
             renderMagazineLayout();
             setupEventListeners();
+            updateCampaignDisplayInfo();
+            
+            // Check for campaign parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const campaignParam = urlParams.get('campaign');
+            if (campaignParam) {
+                // Load campaign data based on parameter
+                loadCampaignData(campaignParam);
+            }
         });
+        
+        // Update the campaign information display
+        function updateCampaignDisplayInfo() {
+            // Format volume with commas
+            document.getElementById('volume-display').textContent = campaignData.volume.toLocaleString();
+            
+            // Format date nicely
+            const inHomeDate = new Date(campaignData.inHomeDate);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('in-home-display').textContent = inHomeDate.toLocaleDateString('en-US', options);
+        }
+        
+        // Load campaign data
+        function loadCampaignData(campaignId) {
+            // In production, this would fetch campaign data from an API
+            console.log(`Loading campaign data for: ${campaignId}`);
+            // Example: fetch('/api/campaigns/' + campaignId)
+            //   .then(response => response.json())
+            //   .then(data => updateCampaignData(data));
+        }
+        
+        // Update campaign data
+        function updateCampaignData(data) {
+            // Update campaign info
+            document.querySelector('header h1').textContent = data.name;
+            document.querySelector('header p').textContent = data.description;
+            
+            // Update magazine layout data
+            magazineData.campaignId = data.campaignId;
+            magazineData.campaignName = data.name;
+            magazineData.pages = data.pages;
+            
+            // Update volume and in-home date if available
+            if (data.volume) {
+                magazineData.volume = data.volume;
+            }
+            
+            if (data.inHomeDate) {
+                magazineData.inHomeDate = data.inHomeDate;
+            }
+            
+            // Update display
+            updateCampaignDisplayInfo();
+            
+            // Re-render layout
+            renderMagazineLayout();
+        }
         
         // Render the magazine layout
         function renderMagazineLayout() {
@@ -781,7 +876,7 @@
                     <div class="page-info">
                         <div class="page-title">${page.name}</div>
                         ${page.type === 'Premium' ? '<span class="premium-tag">Premium</span>' : ''}
-                        <div class="page-price">${(page.basePrice + page.additionalPremium).toLocaleString()}</div>
+                        <div class="page-price">$${(page.basePrice + page.additionalPremium).toLocaleString()}</div>
                         ${!page.available ? `<div class="reserved-by">Reserved by: ${page.reservedBy}</div>` : ''}
                     </div>
                 `;
@@ -870,9 +965,42 @@
             articleCounter.textContent = `${placement.articleCopy ? placement.articleCopy.length : 0}/700 characters`;
             document.getElementById('page-title').value = placement.pageTitle || '';
             document.getElementById('copy-writing').checked = placement.copyWriting || false;
+        }
+        
+        // Check if two pages can form a spread
+        function checkForSpread(pageId) {
+            const page = magazineData.pages.find(p => p.id === pageId);
+            if (!page || !page.facingPage) return false;
             
-            // Note: File uploads can't be repopulated easily in HTML
-            // In production, you'd show a list of already uploaded files
+            const facingPage = page.facingPage;
+            
+            // If both pages are selected, they form a spread
+            return selectedPlacements[facingPage] ? facingPage : false;
+        }
+        
+        // Create a spread from two pages
+        function createSpread(page1Id, page2Id) {
+            const page1 = magazineData.pages.find(p => p.id === page1Id);
+            const page2 = magazineData.pages.find(p => p.id === page2Id);
+            
+            // Create spread ID
+            const spreadId = `spread-${page1.pageNumber}-${page2.pageNumber}`;
+            
+            // Create spread data
+            const spreadData = {
+                pageId: spreadId,
+                pageName: `Double-Page Spread (${page1.pageNumber}-${page2.pageNumber})`,
+                pageNumber: `${page1.pageNumber}-${page2.pageNumber}`,
+                pageType: "Premium",
+                basePrice: page1.basePrice + page2.basePrice,
+                additionalPremium: 5000, // From the proposal PDF
+                totalPrice: page1.basePrice + page2.basePrice + 5000,
+                isSpread: true,
+                originalPages: [page1Id, page2Id]
+            };
+            
+            // Return spread data
+            return spreadData;
         }
         
         // Add a placement to the selection
@@ -919,8 +1047,38 @@
                 placement.totalPrice += 50;
             }
             
-            // Add to the selected placements
-            selectedPlacements[pageId] = placement;
+            // Check if this page can form a spread with another selected page
+            const facingPageId = checkForSpread(pageId);
+            
+            if (facingPageId) {
+                // Create a spread from the two pages
+                const spreadData = createSpread(pageId, facingPageId);
+                
+                // Remove the individual pages
+                delete selectedPlacements[pageId];
+                delete selectedPlacements[facingPageId];
+                
+                // Add the spread data with the current placement details
+                spreadData.productName = placement.productName;
+                spreadData.productPrice = placement.productPrice;
+                spreadData.productCopy = placement.productCopy;
+                spreadData.productUrl = placement.productUrl;
+                spreadData.discountCode = placement.discountCode;
+                spreadData.utmParams = placement.utmParams;
+                spreadData.articleCopy = placement.articleCopy;
+                spreadData.pageTitle = placement.pageTitle;
+                spreadData.copyWriting = placement.copyWriting;
+                spreadData.timestamp = placement.timestamp;
+                
+                // Add spread to selected placements
+                selectedPlacements[spreadData.pageId] = spreadData;
+                
+                // Alert user about the spread upgrade
+                alert(`Great choice! Your selection has been automatically upgraded to a Premium Double-Page Spread for maximum impact.`);
+            } else {
+                // Add to the selected placements normally
+                selectedPlacements[pageId] = placement;
+            }
             
             // Update the magazine layout
             renderMagazineLayout();
@@ -955,8 +1113,6 @@
                 // Add remove functionality
                 const removeBtn = fileItem.querySelector('.remove-file');
                 removeBtn.addEventListener('click', () => {
-                    // In production, you'd need to handle file removal properly
-                    // This is just a simple UI demonstration
                     fileItem.remove();
                     
                     // If there are no files left, clear the input
@@ -988,9 +1144,9 @@
                     
                     row.innerHTML = `
                         <td>${placement.pageNumber}</td>
-                        <td>${placement.pageType}</td>
+                        <td>${placement.pageType}${placement.isSpread ? ' Spread' : ''}</td>
                         <td>${placement.productName}</td>
-                        <td>${placement.totalPrice.toLocaleString()}</td>
+                        <td>$${placement.totalPrice.toLocaleString()}</td>
                         <td>
                             <button type="button" class="btn btn-secondary" data-page-id="${placement.pageId}">Remove</button>
                         </td>
@@ -1005,7 +1161,7 @@
                 });
                 
                 // Update the total price
-                totalPriceElement.textContent = `${totalPrice.toLocaleString()}`;
+                totalPriceElement.textContent = `$${totalPrice.toLocaleString()}`;
             } else {
                 emptySelectionMessage.style.display = 'block';
                 summaryTable.style.display = 'none';
@@ -1015,25 +1171,71 @@
         
         // Remove a placement from the selection
         function removePlacement(pageId) {
-            delete selectedPlacements[pageId];
+            // Check if this is a spread
+            if (selectedPlacements[pageId] && selectedPlacements[pageId].isSpread) {
+                // Get original pages
+                const originalPages = selectedPlacements[pageId].originalPages;
+                
+                // Remove spread
+                delete selectedPlacements[pageId];
+                
+                // Let user know they can add the individual pages back
+                alert("The spread has been removed. You can add the individual pages back if desired.");
+            } else {
+                // Regular page removal
+                delete selectedPlacements[pageId];
+            }
+            
             renderMagazineLayout();
             updateSummary();
+        }
+        
+        // Form validation
+        function validateForm() {
+            // Required brand fields
+            const brandName = document.getElementById('brand-name').value;
+            const contactName = document.getElementById('contact-name').value;
+            const contactEmail = document.getElementById('contact-email').value;
+            const mailingAddress = document.getElementById('mailing-address').value;
+            const brandUrl = document.getElementById('brand-url').value;
+            const brandLogo = document.getElementById('brand-logo').files.length;
+            
+            if (!brandName || !contactName || !contactEmail || !mailingAddress || !brandUrl || !brandLogo) {
+                alert('Please complete all required fields in the Brand Information section.');
+                return false;
+            }
+            
+            // At least one placement
+            if (Object.keys(selectedPlacements).length === 0) {
+                alert('Please select at least one placement before submitting.');
+                return false;
+            }
+            
+            return true;
         }
         
         // Submit the reservation
         function submitReservation(event) {
             event.preventDefault();
             
-            // Validate that at least one placement is selected
-            if (Object.keys(selectedPlacements).length === 0) {
-                alert('Please select at least one placement before submitting.');
+            // Validate the form
+            if (!validateForm()) {
                 return;
             }
+            
+            // Show the loader
+            loader.style.display = 'block';
+            
+            // Hide any previous messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
             
             // Collect the form data
             const formData = {
                 campaignId: magazineData.campaignId,
                 campaignName: magazineData.campaignName,
+                volume: magazineData.volume,
+                inHomeDate: magazineData.inHomeDate,
                 brandName: document.getElementById('brand-name').value,
                 contactName: document.getElementById('contact-name').value,
                 contactEmail: document.getElementById('contact-email').value,
@@ -1044,66 +1246,65 @@
                 submissionDate: new Date().toISOString()
             };
             
-            // Show the loader
-            loader.style.display = 'block';
+            // Prepare files for upload
+            const files = new FormData();
             
-            // Hide any previous messages
-            successMessage.style.display = 'none';
-            errorMessage.style.display = 'none';
+            // Add logo file
+            if (brandLogo.files.length > 0) {
+                files.append('brandLogo', brandLogo.files[0]);
+            }
             
-            // In production, this would be an actual AJAX request to submit the data
-            // For this demonstration, we'll simulate a successful submission after a delay
+            // Add product images
+            if (productImages.files.length > 0) {
+                for (let i = 0; i < productImages.files.length; i++) {
+                    files.append('productImages[]', productImages.files[i]);
+                }
+            }
+            
+            // Add form data as JSON
+            files.append('formData', JSON.stringify(formData));
+            
+            // Submit the form to Google Apps Script
+            // In a production environment, this would be your actual endpoint
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbySo-igSpJwL1dct5V0Rqu4rJ7oJW9n8mDGL8Xnr1qHRzBciXAmQE8joU2ptBkmjt0F/exec';
+            
+            // For this demo, we'll simulate a successful submission
             setTimeout(() => {
-                // Simulate form submission to Google Sheets (in production this would be an actual API call)
-                submitToGoogleSheets(formData)
-                    .then(response => {
-                        // Hide the loader
-                        loader.style.display = 'none';
-                        
-                        if (response.success) {
-                            // Show success message
-                            successMessage.style.display = 'block';
-                            
-                            // Reset the form and selection
-                            resetForm();
-                        } else {
-                            // Show error message
-                            errorMessage.textContent = response.error || 'There was an error submitting your reservation. Please try again.';
-                            errorMessage.style.display = 'block';
-                        }
-                    })
-                    .catch(error => {
-                        // Hide the loader
-                        loader.style.display = 'none';
-                        
-                        // Show error message
-                        errorMessage.textContent = 'There was an error connecting to the server. Please try again later.';
-                        errorMessage.style.display = 'block';
-                        console.error('Error:', error);
-                    });
-            }, 1500); // Simulate network delay
-        }
-        
-        // Function to submit data to Google Sheets (mock function for demonstration)
-        function submitToGoogleSheets(formData) {
-            // In production, this would be an actual API call to a Google Apps Script endpoint
-            // For this demonstration, we'll simulate a successful response
-            return new Promise((resolve) => {
-                // Simulate successful submission
-                resolve({
-                    success: true,
-                    message: 'Reservation submitted successfully!',
-                    reservationId: 'MM-' + Math.floor(100000 + Math.random() * 900000)
-                });
-                
-                // To simulate an error, uncomment this:
+                // In production, this would be a fetch request:
                 /*
-                resolve({
-                    success: false,
-                    error: 'Server is currently unavailable. Please try again later.'
+                fetch(scriptUrl, {
+                    method: 'POST',
+                    body: files,
+                    mode: 'no-cors'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Show success message
+                        loader.style.display = 'none';
+                        successMessage.style.display = 'block';
+                        resetForm();
+                    } else {
+                        // Show error message
+                        loader.style.display = 'none';
+                        errorMessage.textContent = 'There was an error submitting your reservation. Please try again.';
+                        errorMessage.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    // Show error message
+                    loader.style.display = 'none';
+                    errorMessage.textContent = 'There was an error connecting to the server. Please try again later.';
+                    errorMessage.style.display = 'block';
+                    console.error('Error:', error);
                 });
                 */
-            });
+                
+                // Simulate success
+                loader.style.display = 'none';
+                successMessage.style.display = 'block';
+                resetForm();
+                
+            }, 2000); // Simulate network delay
         }
         
         // Reset the form and selection
@@ -1132,5 +1333,3 @@
     </script>
 </body>
 </html>
-
-                

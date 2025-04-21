@@ -34,6 +34,10 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
+        <form id="hidden-submission-form" style="display: none;" method="POST" target="_blank">
+          <input type="hidden" id="form-data-input" name="data">
+        </form>
         
         /* Header Styles */
         header {
@@ -1218,61 +1222,42 @@
         }
         
         // Submit the reservation
-         function submitReservation(event) {
+        function submitReservation(event) {
             event.preventDefault();
             
-            // Validate the form
-            if (!validateForm()) {
+            // Basic validation
+            const brandName = document.getElementById('brand-name').value;
+            if (!brandName) {
+                alert('Please enter a brand name');
                 return;
             }
             
-            // Show the loader
+            // Show loading indicator
             loader.style.display = 'block';
-            
-            // Hide any previous messages
             successMessage.style.display = 'none';
             errorMessage.style.display = 'none';
             
-            // Collect the form data
-            const formData = {
-                campaignId: magazineData.campaignId || "MM-SP25",
-                campaignName: magazineData.campaignName || "Spring 2025 - Maternity in Style",
-                volume: magazineData.volume || 50000,
-                inHomeDate: magazineData.inHomeDate || "2025-05-15",
+            // Create a very simple data object
+            const data = {
                 brandName: document.getElementById('brand-name').value,
                 contactName: document.getElementById('contact-name').value,
-                contactEmail: document.getElementById('contact-email').value,
-                mailingAddress: document.getElementById('mailing-address').value,
-                brandUrl: document.getElementById('brand-url').value,
-                placements: Object.values(selectedPlacements),
-                totalPrice: Object.values(selectedPlacements).reduce((total, p) => total + p.totalPrice, 0),
-                submissionDate: new Date().toISOString()
+                contactEmail: document.getElementById('contact-email').value
             };
             
-            console.log("Submitting data:", formData);
+            // Set the form's action to your Google Apps Script URL
+            const form = document.getElementById('hidden-submission-form');
+            form.action = 'https://script.google.com/macros/s/AKfycbx9iYpgKu6GuUG0DchmU8SN2A9mHD1igvJ053YhYqFXRV5PHx_V7RRV3RIkg_SYVLot/exec'; // Replace with your actual script URL
             
-            // Use the reliable method of a hidden form submission
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = 'https://script.google.com/macros/s/AKfycbx9iYpgKu6GuUG0DchmU8SN2A9mHD1igvJ053YhYqFXRV5PHx_V7RRV3RIkg_SYVLot/exec'; // Replace with your script URL
-            form.target = '_blank'; // Open response in new tab (for debugging)
+            // Set the data as a query parameter
+            document.getElementById('form-data-input').value = JSON.stringify(data);
             
-            // Add the form data as a hidden input
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'formData';
-            input.value = JSON.stringify(formData);
-            form.appendChild(input);
-            
-            // Add the form to the body and submit it
-            document.body.appendChild(form);
+            // Submit the form
             form.submit();
             
-            // Show success message after short delay (since we can't catch the response)
+            // Show success message after a delay
             setTimeout(() => {
                 loader.style.display = 'none';
                 successMessage.style.display = 'block';
-                resetForm();
             }, 2000);
         }
         
